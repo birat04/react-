@@ -1,24 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  // State to hold the list of todos and the current input value.
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState('');
+  const [filter, setFilter] = useState('all'); 
 
-  // Function to add a new todo.
+ 
+  useEffect(() => {
+    const storedTodos = JSON.parse(localStorage.getItem('todos'));
+    if (storedTodos) {
+      setTodos(storedTodos);
+    }
+  }, []);
+
+  
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
+
+ 
   const addTodo = () => {
-    if (!input.trim()) return; // Prevent adding empty todos
+    if (!input.trim()) return; 
     const newTodo = {
-      id: Date.now(), // Unique identifier
+      id: Date.now(), 
       text: input,
       completed: false,
     };
     setTodos([...todos, newTodo]);
-    setInput(''); // Clear input after adding
+    setInput(''); 
   };
 
-  // Function to toggle the completion status of a todo.
   const toggleTodo = (id) => {
     setTodos(
       todos.map((todo) =>
@@ -27,14 +39,19 @@ function App() {
     );
   };
 
-  // Function to delete a todo.
   const deleteTodo = (id) => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
 
+  const filteredTodos = todos.filter((todo) => {
+    if (filter === 'active') return !todo.completed;
+    if (filter === 'completed') return todo.completed;
+    return true; 
+  });
+
   return (
     <div className="App">
-      <h1>Todo App</h1>
+      <h1>Todo App with Persistence & Filtering</h1>
       {/* Input and button for adding todos */}
       <input
         type="text"
@@ -44,16 +61,39 @@ function App() {
       />
       <button onClick={addTodo}>Add Todo</button>
 
-      {/* List of todos */}
+      {/* Filter Buttons */}
+      <div className="filters">
+        <button 
+          onClick={() => setFilter('all')}
+          className={filter === 'all' ? 'active' : ''}
+        >
+          All
+        </button>
+        <button 
+          onClick={() => setFilter('active')}
+          className={filter === 'active' ? 'active' : ''}
+        >
+          Active
+        </button>
+        <button 
+          onClick={() => setFilter('completed')}
+          className={filter === 'completed' ? 'active' : ''}
+        >
+          Completed
+        </button>
+      </div>
+
+      {/* List of Todos */}
       <ul>
-        {todos.map((todo) => (
-          <li key={todo.id} style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+        {filteredTodos.map((todo) => (
+          <li 
+            key={todo.id} 
+            style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+          >
             {todo.text}
-            {/* Toggle button */}
             <button onClick={() => toggleTodo(todo.id)}>
               {todo.completed ? 'Undo' : 'Complete'}
             </button>
-            {/* Delete button */}
             <button onClick={() => deleteTodo(todo.id)}>Delete</button>
           </li>
         ))}
