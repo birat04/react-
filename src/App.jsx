@@ -51,7 +51,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Todo App with Persistence & Filtering</h1>
+      <h1>Todo App</h1>
       {/* Input and button for adding todos */}
       <input
         type="text"
